@@ -1,0 +1,125 @@
+{% extends "simulator/base.html" %}
+{% block title %}{{ agenda.title }}{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1>{{ agenda.title }}</h1>
+    <div class="muted">{{ agenda.target_region|default:"global" }} · {{ agenda.target_population|default:"all populations" }}</div>
+  </div>
+  <a class="button secondary" href="{% url 'ui-dashboard' %}">Back</a>
+</div>
+
+<div class="grid">
+  <div class="stack">
+    <section class="panel">
+      <h2>Add Cluster</h2>
+      <form method="post" class="form-grid">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add_cluster">
+        <label>Name
+          <input name="name" required placeholder="Privacy-first skeptics">
+        </label>
+        <label>Description
+          <textarea name="description" placeholder="Users worried about tracking and opaque AI systems."></textarea>
+        </label>
+        <div class="split">
+          <label>Weight
+            <input name="weight" type="number" min="0" step="0.01" value="1">
+          </label>
+          <label>Confidence
+            <input name="confidence" type="number" min="0" max="1" step="0.01" value="0.7">
+          </label>
+        </div>
+        <button class="button" type="submit">Save Cluster</button>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2>Create Run</h2>
+      <form method="post" class="form-grid">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="create_run">
+        <label>Shock Title
+          <input name="shock_title" required placeholder="Policy announcement">
+        </label>
+        <label>Shock Description
+          <textarea name="shock_description" required placeholder="Government announces disclosure label requirements."></textarea>
+        </label>
+        <div class="split">
+          <label>Event Type
+            <input name="event_type" placeholder="policy">
+          </label>
+          <label>
+            Hybrid Sampling
+            <select name="hybrid_sampling">
+              <option value="">Off</option>
+              <option value="on">On</option>
+            </select>
+          </label>
+        </div>
+        <button class="button" type="submit">Create Prediction Run</button>
+      </form>
+    </section>
+  </div>
+
+  <div class="stack">
+    <section class="panel">
+      <h2>Clusters</h2>
+      {% if clusters %}
+        {% for cluster in clusters %}
+          <div class="row">
+            <div>
+              <h3>{{ cluster.name }}</h3>
+              <div class="muted">{{ cluster.description|default:"No description" }}</div>
+              <div class="meta">
+                <span>weight {{ cluster.weight }}</span>
+                <span>confidence {{ cluster.confidence }}</span>
+              </div>
+            </div>
+            <span class="chip">{{ cluster.weight_source }}</span>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty">No clusters yet.</div>
+      {% endif %}
+    </section>
+
+    <section class="panel">
+      <h2>Runs</h2>
+      {% if runs %}
+        {% for run in runs %}
+          <a class="row" href="{% url 'ui-run-detail' run.id %}">
+            <div>
+              <h3>{{ run.created_at|date:"Y-m-d H:i" }}</h3>
+              <div class="meta">
+                <span>{{ run.shock_events.count }} shocks</span>
+              </div>
+            </div>
+            <span class="chip status-{{ run.status }}">{{ run.status }}</span>
+          </a>
+        {% endfor %}
+      {% else %}
+        <div class="empty">No runs yet.</div>
+      {% endif %}
+    </section>
+
+    <section class="panel">
+      <h2>Topics</h2>
+      {% if topics %}
+        {% for topic in topics %}
+          <div class="row">
+            <div>
+              <h3>{{ topic.title }}</h3>
+              <div class="muted">{{ topic.summary|default:"No summary" }}</div>
+            </div>
+            <span class="chip">{{ topic.importance_score }}</span>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty">No memory topics yet.</div>
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}
+

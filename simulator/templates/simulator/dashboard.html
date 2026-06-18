@@ -1,0 +1,77 @@
+{% extends "simulator/base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1>Agenda Dashboard</h1>
+    <div class="muted">군집 기반 사회예측 실행 현황</div>
+  </div>
+</div>
+
+<div class="grid">
+  <section class="panel">
+    <h2>New Agenda</h2>
+    <form method="post" class="form-grid">
+      {% csrf_token %}
+      <label>Title
+        <input name="title" required placeholder="AI search regulation backlash">
+      </label>
+      <label>Description
+        <textarea name="description" required placeholder="Predict public reaction to a policy, product, or social event."></textarea>
+      </label>
+      <div class="split">
+        <label>Region
+          <input name="target_region" placeholder="US">
+        </label>
+        <label>Population
+          <input name="target_population" placeholder="general online users">
+        </label>
+      </div>
+      <button class="button" type="submit">Create Agenda</button>
+    </form>
+  </section>
+
+  <div class="stack">
+    <section class="panel">
+      <h2>Agendas</h2>
+      {% if agendas %}
+        {% for agenda in agendas %}
+          <a class="row" href="{% url 'ui-agenda-detail' agenda.id %}">
+            <div>
+              <h3>{{ agenda.title }}</h3>
+              <div class="meta">
+                <span>{{ agenda.target_region|default:"global" }}</span>
+                <span>{{ agenda.clusters.count }} clusters</span>
+                <span>{{ agenda.prediction_runs.count }} runs</span>
+              </div>
+            </div>
+            <span class="chip">Open</span>
+          </a>
+        {% endfor %}
+      {% else %}
+        <div class="empty">No agendas yet.</div>
+      {% endif %}
+    </section>
+
+    <section class="panel">
+      <h2>Recent Runs</h2>
+      {% if recent_runs %}
+        {% for run in recent_runs %}
+          <a class="row" href="{% url 'ui-run-detail' run.id %}">
+            <div>
+              <h3>{{ run.agenda.title }}</h3>
+              <div class="meta">
+                <span>{{ run.created_at|date:"Y-m-d H:i" }}</span>
+              </div>
+            </div>
+            <span class="chip status-{{ run.status }}">{{ run.status }}</span>
+          </a>
+        {% endfor %}
+      {% else %}
+        <div class="empty">No prediction runs yet.</div>
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,83 @@
+{% extends "simulator/base.html" %}
+{% block title %}Prediction Run{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1>{{ run.agenda.title }}</h1>
+    <div class="muted">Prediction run · {{ run.created_at|date:"Y-m-d H:i" }}</div>
+  </div>
+  <a class="button secondary" href="{% url 'ui-agenda-detail' run.agenda.id %}">Agenda</a>
+</div>
+
+<div class="grid">
+  <div class="stack">
+    <section class="panel">
+      <h2>Status</h2>
+      <div class="row">
+        <div>
+          <h3>{{ run.status }}</h3>
+          <div class="meta">
+            <span>{{ run.started_at|default:"not started" }}</span>
+            <span>{{ run.completed_at|default:"not completed" }}</span>
+          </div>
+        </div>
+        <span class="chip status-{{ run.status }}">{{ run.status }}</span>
+      </div>
+      {% if run.error_message %}
+        <pre>{{ run.error_message }}</pre>
+      {% endif %}
+    </section>
+
+    <section class="panel">
+      <h2>Opinion Distribution</h2>
+      {% if run.opinion_distribution %}
+        <pre>{{ run.opinion_distribution }}</pre>
+      {% else %}
+        <div class="empty">No distribution yet.</div>
+      {% endif %}
+    </section>
+  </div>
+
+  <div class="stack">
+    <section class="panel">
+      <h2>Cluster States</h2>
+      {% if states %}
+        {% for state in states %}
+          <div class="row">
+            <div>
+              <h3>{{ state.cluster.name }} · {{ state.stance }}</h3>
+              <div class="muted">{{ state.reasoning|default:"No reasoning" }}</div>
+              <div class="meta">
+                <span>shock {{ state.shock_event.order }}</span>
+                <span>acceptance {{ state.acceptance_score }}</span>
+                <span>confidence {{ state.confidence }}</span>
+              </div>
+            </div>
+            <span class="chip">{{ state.sentiment|default:"n/a" }}</span>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty">No states yet.</div>
+      {% endif %}
+    </section>
+
+    <section class="panel">
+      <h2>Raw Turns</h2>
+      {% if turns %}
+        {% for turn in turns %}
+          <div class="row">
+            <div>
+              <h3>{{ turn.cluster.name|default:turn.speaker_type }}</h3>
+              <div class="muted">{{ turn.text }}</div>
+            </div>
+            <span class="chip">{{ turn.speaker_type }}</span>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty">No raw turns yet.</div>
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}
+
